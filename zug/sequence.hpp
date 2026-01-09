@@ -76,7 +76,7 @@ struct sequence_data
 
     sequence_data& operator=(sequence_data&& other)
     {
-        impl_ = std::move(other.impl);
+        impl_ = std::move(other.impl_);
         impl_.reductor.current(this);
     }
 
