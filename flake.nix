@@ -2,6 +2,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     flake-utils.url = "github:numtide/flake-utils";
+    nix-github-actions = {
+      url = "github:nix-community/nix-github-actions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     gitignore = {
       url = "github:hercules-ci/gitignore.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -14,8 +18,19 @@
       nixpkgs,
       flake-utils,
       gitignore,
+      nix-github-actions,
     }:
-    flake-utils.lib.eachDefaultSystem (
+    {
+      githubActions = nix-github-actions.lib.mkGithubMatrix {
+        checks = nixpkgs.lib.getAttrs [
+          "x86_64-linux"
+          "aarch64-linux"
+          # "x86_64-darwin" not supported by GH Actions runners anymore
+          "aarch64-darwin"
+        ] self.checks;
+      };
+    }
+    // flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
